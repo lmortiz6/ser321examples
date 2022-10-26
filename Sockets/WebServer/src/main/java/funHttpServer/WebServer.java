@@ -278,32 +278,50 @@ class WebServer {
             System.out.println(json);
             
             int searchIndex = 0;
+            int newIndex = 0;
             int endIndex = 0;
             String full_name = "";
             String repoId = "";
             String owner = "";
             int escape = 0;
+            //iterate through json, parsing for full_name, repoId, owner
             while (searchIndex != -1 && escape < 50) {
-              searchIndex = json.indexOf("\"id\"", searchIndex);
+              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"id\"");
+              if (newIndex != -1) {
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+              } else {
+                searchIndex = -1;
+              }
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
                 repoId = "id: " + json.substring(searchIndex+10, endIndex);
               }
-              searchIndex = json.indexOf("\"full_name\"", searchIndex);
+              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
+              if (newIndex != -1) {
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+              } else {
+            	  searchIndex = -1;
+              }
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
                 full_name = json.substring(searchIndex+12, endIndex);
               }
-              searchIndex = json.indexOf("\"login\"", searchIndex);
+              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"login\"", searchIndex);
+              if (newIndex != -1) {
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+              } else {
+                searchIndex = -1;
+              }
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
                 owner = json.substring(searchIndex+8, endIndex);
               }
-              searchIndex = json.indexOf("\"id\"", searchIndex);
-              if (searchIndex != -1) {
-            	  searchIndex++;
+              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"id\"", searchIndex);
+              if (newIndex != -1) {
+                  searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length() + 1;
+              } else {
+                searchIndex = -1;
               }
-              
               githubData += "<br>Full Name: " + full_name + "<br>id: " + repoId + "<br>Login Name: " + owner + "<br>";
               escape++;
             }
