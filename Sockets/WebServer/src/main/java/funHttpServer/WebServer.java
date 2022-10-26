@@ -296,7 +296,9 @@ class WebServer {
               if (searchIndex != -1) {
                 repoId = "id: " + json.substring(searchIndex+10, endIndex);
               }
-              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
+              if (searchIndex != -1) {
+            	  newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
+              }
               if (newIndex != -1) {
                 searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length();
               } else {
@@ -306,7 +308,9 @@ class WebServer {
               if (searchIndex != -1) {
                 full_name = json.substring(searchIndex+12, endIndex);
               }
-              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"login\"", searchIndex);
+              if (searchIndex != -1) {
+            	  newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
+              }
               if (newIndex != -1) {
                 searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length();
               } else {
@@ -316,7 +320,9 @@ class WebServer {
               if (searchIndex != -1) {
                 owner = json.substring(searchIndex+8, endIndex);
               }
-              newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"id\"", searchIndex);
+              if (searchIndex != -1) {
+            	  newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
+              }
               if (newIndex != -1) {
                   searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length() + 1;
               } else {
