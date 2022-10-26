@@ -71,7 +71,7 @@ class WebServer {
   /**
    * Used in the "/random" endpoint
    */
-  private final static HashMap<String, String> _images = new HashMap<>() {
+  private final static HashMap<String, String> _images = new HashMap<String, String>() {
     {
       put("streets", "https://iili.io/JV1pSV.jpg");
       put("bread", "https://iili.io/Jj9MWG.jpg");
@@ -196,26 +196,49 @@ class WebServer {
         } else if (request.contains("multiply?")) {
           // This multiplies two numbers, there is NO error handling, so when
           // wrong data is given this just crashes
+        	
+          // 2 try catch pairs were used for error handling
+          // Response code 400 was used for when the query is formatted incorrectly
+
+          String calculation = "";
+          String responseCode = "HTTP/1.1 200 OK\n";
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           // extract path parameters
-          query_pairs = splitQuery(request.replace("multiply?", ""));
+          try {
+            query_pairs = splitQuery(request.replace("multiply?", ""));
+          } catch (UnsupportedEncodingException e) {
+            calculation = "Error: Please format GET parameters correctly";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          
+          if (!query_pairs.containsKey("num1") || !query_pairs.containsKey("num2")) {
+        	  calculation = "Error: Please include all required parameters";
+        	  responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
 
           // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+          Integer num1 = 1;
+          Integer num2 = 1;
+          try {
+            num1 = Integer.parseInt(query_pairs.get("num1"));
+            num2 = Integer.parseInt(query_pairs.get("num2"));
+          } catch (NumberFormatException e) {
+            calculation = "Error: Please only use numbers as parameters";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
 
           // do math
           Integer result = num1 * num2;
+          if (calculation.length() == 0) {
+            calculation = "Result is: " + result;
+          }
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
+          builder.append(responseCode);
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
-          builder.append("Result is: " + result);
-
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+          builder.append(calculation);
 
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
@@ -226,21 +249,149 @@ class WebServer {
           // "Owner's repo is named RepoName. Example: find RepoName's contributors" translates to
           //     "/repos/OWNERNAME/REPONAME/contributors"
 
+          String githubData = "";
+          String responseCode = "HTTP/1.1 200 OK\n";
+          
+          
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
+          try {
+            query_pairs = splitQuery(request.replace("github?", ""));
+          } catch (UnsupportedEncodingException e) {
+            githubData = "Error: Please format GET parameters correctly";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          
+          String[] urlParse = {"","",""};
+          
+          if (!query_pairs.containsKey("query")) {
+        	  githubData = "Error: Please include the required parameter";
+          }else {
+            urlParse = query_pairs.get("query").split("/");
+          
+            if (urlParse.length != 3 || !urlParse[0].equals("users") || !urlParse[2].equals("repos")) {
+              githubData = "Error: Please format GitHub api call correctly";
+              responseCode = "HTTP/1.1 400 Bad Request\n";
+            }
+          }
+          if (githubData.length() == 0) {
+            String json = fetchURL("https://api.github.com/users/" + urlParse[1] + "/repos");
+            System.out.println(json);
+            
+            int searchIndex = 0;
+            int endIndex = 0;
+            String full_name = "";
+            String repoId = "";
+            String owner = "";
+            while (searchIndex != -1) {
+              searchIndex = json.indexOf("\"id\"", searchIndex);
+              endIndex = json.indexOf(",", searchIndex);
+              if (searchIndex != -1) {
+                repoId = "id: " + json.substring(searchIndex+6, endIndex);
+              }
+              searchIndex = json.indexOf("\"full_name\"", searchIndex);
+              endIndex = json.indexOf(",", searchIndex);
+              if (searchIndex != -1) {
+                full_name = json.substring(searchIndex+13, endIndex);
+              }
+              searchIndex = json.indexOf("\"login\"", searchIndex);
+              endIndex = json.indexOf(",", searchIndex);
+              if (searchIndex != -1) {
+                owner = json.substring(searchIndex+9, endIndex);
+              }
+              searchIndex = json.indexOf("\"id\"", searchIndex);
+              if (searchIndex != -1) {
+            	  searchIndex++;
+              }
+              
+              githubData += "\nFull Name: " + full_name + "\nid: " + repoId + "\nLogin Name: " + owner + "\n";
+            }
+          }
 
-          builder.append("HTTP/1.1 200 OK\n");
+          builder.append(responseCode);
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
+          builder.append(githubData);
 
+        } else if (request.contains("anagram?")) {
+          //checks if parameters are anagrams
+          
+          String answer = "";
+          String responseCode = "HTTP/1.1 200 OK\n";
+
+          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          try {
+            query_pairs = splitQuery(request.replace("anagram?", ""));
+          } catch (UnsupportedEncodingException e) {
+            answer = "Error: Please format GET parameters correctly";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          
+          if (!query_pairs.containsKey("string1") || !query_pairs.containsKey("string2")) {
+        	  answer = "Error: Please provide all required parameters";
+        	  responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          
+          if (answer.length() == 0) {
+            String string1 = query_pairs.get("string1");
+            String string2 = query_pairs.get("string2");
+            if (anagramCheck(query_pairs.get("string1"), query_pairs.get("string2"))) {
+              answer = string1 + " and " + string2 + " are anagrams.";
+            } else {
+              answer = string1 + " and " + string2 + " are NOT anagrams.";
+            }
+          }
+          
+          builder.append(responseCode);
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+          builder.append(answer);
+          
+        } else if (request.contains("shift?")) {
+          //shifts all characters in a string by amount
+          
+          String input = "";
+          int amount = 0;
+          String answer = "";
+          String responseCode = "HTTP/1.1 200 OK\n";
+          
+          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          try {
+            query_pairs = splitQuery(request.replace("shift?", ""));
+          } catch (UnsupportedEncodingException e) {
+            answer = "Error: Please format GET parameters correctly";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          
+          if (!query_pairs.containsKey("string") || !query_pairs.containsKey("amount")) {
+            answer = "Error: Please provide all required parameters";
+            responseCode = "HTTP/1.1 400 Bad Request\n";
+          }
+          if (answer.length() == 0) {
+            try {
+              amount = Integer.valueOf(query_pairs.get("amount"));
+            } catch (NumberFormatException e) {
+              answer = "Error: Please format Integer parameter correctly";
+              responseCode = "HTTP/1.1 400 Bad Request\n";
+            }
+          }
+          
+          if (answer.length() == 0) {
+        	  input = query_pairs.get("string");
+        	  char[] chars = input.toCharArray();
+        	  for (int i = 0; i < chars.length; i++) {
+        		  chars[i] += amount;
+        	  }
+        	  answer = new String(chars);
+          }
+          
+          builder.append(responseCode);
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+          builder.append(answer);
+          
         } else {
           // if the request is not recognized at all
-
+          
           builder.append("HTTP/1.1 400 Bad Request\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
@@ -256,6 +407,24 @@ class WebServer {
     }
 
     return response;
+  }
+  
+  public static Boolean anagramCheck(String string1, String string2) {
+    if (string1.length() != string2.length()) {
+	  return false;
+    }
+    char[] chars1 = string1.toCharArray();
+    char[] chars2 = string2.toCharArray();
+    Arrays.sort(chars1);
+    Arrays.sort(chars2);
+    String sort1 = new String(chars1);
+    String sort2 = new String(chars2);
+    
+    if (sort1.equals(sort2)) {
+      return true;
+    }
+    
+    return false;
   }
 
   /**
@@ -292,7 +461,7 @@ class WebServer {
     if (filenames.size() > 0) {
       StringBuilder builder = new StringBuilder();
       builder.append("<ul>\n");
-      for (var filename : filenames) {
+      for (String filename : filenames) {
         builder.append("<li>" + filename + "</li>");
       }
       builder.append("</ul>\n");
