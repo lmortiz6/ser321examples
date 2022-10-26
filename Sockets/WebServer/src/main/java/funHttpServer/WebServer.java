@@ -440,8 +440,12 @@ class WebServer {
     // ["q=hello+world%2Fme", "bob=5"]
     for (String pair : pairs) {
       int idx = pair.indexOf("=");
+      if (idx != -1) {
       query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
           URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+      } else {
+    	  throw new UnsupportedEncodingException();
+      }
     }
     // {{"q", "hello world/me"}, {"bob","5"}}
     return query_pairs;
