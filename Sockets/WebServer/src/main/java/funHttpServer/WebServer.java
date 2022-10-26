@@ -288,7 +288,7 @@ class WebServer {
             while (searchIndex != -1 && escape < 50) {
               newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"id\"");
               if (newIndex != -1) {
-                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length();
               } else {
                 searchIndex = -1;
               }
@@ -298,7 +298,7 @@ class WebServer {
               }
               newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"full_name\"");
               if (newIndex != -1) {
-                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length();
               } else {
             	  searchIndex = -1;
               }
@@ -308,7 +308,7 @@ class WebServer {
               }
               newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"login\"", searchIndex);
               if (newIndex != -1) {
-                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length();
+                searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length();
               } else {
                 searchIndex = -1;
               }
@@ -318,7 +318,7 @@ class WebServer {
               }
               newIndex = json.substring(searchIndex, json.length()-1).indexOf("\"id\"", searchIndex);
               if (newIndex != -1) {
-                  searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length() - 1).length() + 1;
+                  searchIndex = newIndex + json.length() - json.substring(searchIndex, json.length()).length() + 1;
               } else {
                 searchIndex = -1;
               }
