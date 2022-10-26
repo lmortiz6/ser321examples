@@ -282,7 +282,8 @@ class WebServer {
             String full_name = "";
             String repoId = "";
             String owner = "";
-            while (searchIndex != -1) {
+            int escape = 0;
+            while (searchIndex != -1 && escape < 50) {
               searchIndex = json.indexOf("\"id\"", searchIndex);
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
@@ -304,6 +305,7 @@ class WebServer {
               }
               
               githubData += "\nFull Name: " + full_name + "\nid: " + repoId + "\nLogin Name: " + owner + "\n";
+              escape++;
             }
           }
 
