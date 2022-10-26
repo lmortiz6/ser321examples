@@ -287,24 +287,24 @@ class WebServer {
               searchIndex = json.indexOf("\"id\"", searchIndex);
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
-                repoId = "id: " + json.substring(searchIndex+6, endIndex);
+                repoId = "id: " + json.substring(searchIndex+10, endIndex);
               }
               searchIndex = json.indexOf("\"full_name\"", searchIndex);
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
-                full_name = json.substring(searchIndex+13, endIndex);
+                full_name = json.substring(searchIndex+12, endIndex);
               }
               searchIndex = json.indexOf("\"login\"", searchIndex);
               endIndex = json.indexOf(",", searchIndex);
               if (searchIndex != -1) {
-                owner = json.substring(searchIndex+9, endIndex);
+                owner = json.substring(searchIndex+8, endIndex);
               }
               searchIndex = json.indexOf("\"id\"", searchIndex);
               if (searchIndex != -1) {
             	  searchIndex++;
               }
               
-              githubData += "\nFull Name: " + full_name + "\nid: " + repoId + "\nLogin Name: " + owner + "\n";
+              githubData += "<br>Full Name: " + full_name + "<br>id: " + repoId + "<br>Login Name: " + owner + "<br>";
               escape++;
             }
           }
